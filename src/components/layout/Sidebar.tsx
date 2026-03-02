@@ -35,6 +35,8 @@ import {
   Bot,
   RefreshCw,
   Users2,
+  ShoppingCart,
+  Package,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
@@ -67,6 +69,16 @@ const sections: SidebarSection[] = [
       { name: 'Balance âgée', href: '/audit/balance-agee', icon: BarChart3 },
       { name: 'Tri comptes', href: '/audit/comptes', icon: FolderOpen },
       { name: 'Automatisation', href: '/automatisation', icon: Zap },
+    ],
+  },
+  {
+    label: 'Commercial',
+    icon: ShoppingCart,
+    items: [
+      { name: 'Documents', href: '/commercial', icon: ShoppingCart },
+      { name: 'Catalogue', href: '/commercial/catalogue', icon: Package },
+      { name: 'Abonnements', href: '/commercial/abonnements', icon: RefreshCw },
+      { name: 'Imports', href: '/commercial/imports', icon: Upload },
     ],
   },
   {

@@ -901,3 +901,91 @@ export interface ScoreRisqueResponse {
   score?: ScoreSolvabilite
   error?: string
 }
+
+// ═══════════════════════════════════════
+// GESTION COMMERCIALE (migration 024)
+// ═══════════════════════════════════════
+
+export type DocumentType = 'devis' | 'bon_commande' | 'bon_livraison' | 'proforma' | 'avoir' | 'facture_recurrente'
+export type DocumentStatut = 'brouillon' | 'envoye' | 'accepte' | 'refuse' | 'valide' | 'annule' | 'livre'
+
+export interface DocumentCommercial {
+  id: string
+  user_id: string
+  type: DocumentType
+  numero: string | null
+  statut: DocumentStatut
+  client_id: string | null
+  client_nom: string | null
+  client_email: string | null
+  client_adresse: string | null
+  client_siren: string | null
+  lignes: LigneFacture[]
+  sous_total_ht: number
+  remise_percent: number
+  total_ht: number
+  total_tva: number
+  total_ttc: number
+  acompte: number
+  conditions_paiement: string | null
+  notes: string | null
+  validite_jours: number | null
+  date_emission: string
+  date_echeance: string | null
+  date_livraison: string | null
+  facture_liee_id: string | null
+  devis_lie_id: string | null
+  created_at: string
+  updated_at: string
+  client?: Client
+}
+
+export interface CatalogueProduit {
+  id: string
+  user_id: string
+  reference: string | null
+  nom: string
+  description: string | null
+  prix_ht: number
+  tva_taux: number
+  unite: string
+  categorie: string | null
+  actif: boolean
+  created_at: string
+}
+
+export interface AbonnementRecurrent {
+  id: string
+  user_id: string
+  client_id: string | null
+  client_nom: string | null
+  client_email: string | null
+  nom: string
+  lignes: LigneFacture[]
+  frequence: 'hebdo' | 'mensuel' | 'trimestriel' | 'annuel'
+  prochaine_facturation: string
+  actif: boolean
+  created_at: string
+  client?: Client
+}
+
+export interface HistoriqueDocument {
+  id: string
+  document_id: string
+  user_id: string
+  action: 'creation' | 'modification' | 'envoi' | 'validation' | 'conversion' | 'annulation' | 'facturation'
+  details: Record<string, unknown>
+  created_at: string
+}
+
+export interface ImportEcriture {
+  id: string
+  user_id: string
+  type: 'encaissement' | 'vente_ecommerce' | 'caisse' | 'paie' | 'tiers'
+  fichier_nom: string | null
+  nb_lignes: number
+  nb_importees: number
+  statut: 'en_cours' | 'termine' | 'erreur'
+  erreurs: unknown[]
+  created_at: string
+}
