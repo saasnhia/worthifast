@@ -734,6 +734,23 @@ export interface Client {
 // Facture client (vente)
 export type StatutPaiement = 'en_attente' | 'payee' | 'en_retard' | 'partiellement_payee'
 
+export interface LigneFacture {
+  description: string
+  quantite: number
+  prix_unitaire_ht: number
+  taux_tva: 0 | 5.5 | 10 | 20
+}
+
+export interface TotauxFacture {
+  totalHT: number
+  remiseAmount: number
+  totalHTApresRemise: number
+  tvaParTaux: Record<string, number>
+  totalTVA: number
+  totalTTC: number
+  resteADuTTC: number
+}
+
 export interface FactureClient {
   id: string
   user_id: string
@@ -751,6 +768,10 @@ export interface FactureClient {
   nombre_rappels_envoyes: number
   date_dernier_rappel: string | null
   notes: string | null
+  // Saisie manuelle (migration 022)
+  lignes?: LigneFacture[]
+  conditions_paiement?: string
+  remise_percent?: number
   created_at: string
   updated_at: string
   // Joined from clients table (optional)

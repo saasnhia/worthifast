@@ -32,6 +32,9 @@ import {
   Zap,
   Landmark,
   PieChart,
+  Bot,
+  RefreshCw,
+  Users2,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
@@ -39,7 +42,7 @@ import { createClient } from '@/lib/supabase/client'
 interface SidebarSection {
   label: string
   icon: React.ElementType
-  items: { name: string; href: string; icon: React.ElementType; badge?: boolean }[]
+  items: { name: string; href: string; icon: React.ElementType; badge?: 'overdue' | 'relances' }[]
 }
 
 const sections: SidebarSection[] = [
@@ -49,7 +52,8 @@ const sections: SidebarSection[] = [
     items: [
       { name: 'Transactions', href: '/transactions', icon: Receipt },
       { name: 'Factures', href: '/factures', icon: FileText },
-      { name: 'Notifications', href: '/notifications', icon: Bell, badge: true },
+      { name: 'Relances', href: '/relances', icon: RefreshCw, badge: 'relances' },
+      { name: 'Notifications', href: '/notifications', icon: Bell, badge: 'overdue' },
       { name: 'Banques', href: '/parametres/banques', icon: Building2 },
       { name: 'Import Relevé', href: '/import-releve', icon: Upload },
       { name: 'TVA', href: '/tva', icon: Euro },
@@ -70,6 +74,7 @@ const sections: SidebarSection[] = [
     icon: Briefcase,
     items: [
       { name: 'Mes dossiers', href: '/cabinet', icon: FolderOpen },
+      { name: 'Portail Clients', href: '/portail', icon: Users2 },
       { name: 'E-invoicing 2026', href: '/comptabilite/factures/einvoicing', icon: FileCheck },
     ],
   },
@@ -99,6 +104,7 @@ export function Sidebar() {
   const { user } = useAuth()
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(['Comptabilité', 'Audit']))
   const [overdueCount, setOverdueCount] = useState(0)
+  const [relancesCount, setRelancesCount] = useState(0)
   const [profileType, setProfileType] = useState<'cabinet' | 'entreprise'>('cabinet')
 
   // Fetch overdue count for notification badge
@@ -115,6 +121,23 @@ export function Sidebar() {
     }
     fetchCount()
     const interval = setInterval(fetchCount, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [user?.id])
+
+  // Fetch relances count
+  useEffect(() => {
+    if (!user?.id) return
+    const fetchRelances = async () => {
+      try {
+        const res = await fetch('/api/relances/retard')
+        const data = await res.json()
+        if (data.success && data.factures) {
+          setRelancesCount(data.factures.length)
+        }
+      } catch { /* silent */ }
+    }
+    fetchRelances()
+    const interval = setInterval(fetchRelances, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [user?.id])
 
@@ -173,6 +196,19 @@ export function Sidebar() {
         >
           <Sparkles className="w-4 h-4" />
           Assistant IA
+        </Link>
+        <Link
+          href="/ia/mes-agents"
+          className={`
+            flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+            ${pathname.startsWith('/ia/mes-agents') || pathname.startsWith('/ia/creer-agent')
+              ? 'bg-brand-green-primary text-white'
+              : 'text-neutral-400 hover:bg-white/5 hover:text-white'
+            }
+          `}
+        >
+          <Bot className="w-4 h-4" />
+          Mes Agents
         </Link>
       </div>
 
@@ -264,11 +300,14 @@ export function Sidebar() {
                       >
                         <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
                         {item.name}
-                        {item.badge && overdueCount > 0 && (
-                          <span className="ml-auto flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-coral-500 text-white text-[10px] font-bold leading-none">
-                            {overdueCount > 99 ? '99+' : overdueCount}
-                          </span>
-                        )}
+                        {(() => {
+                          const count = item.badge === 'relances' ? relancesCount : item.badge === 'overdue' ? overdueCount : 0
+                          return count > 0 ? (
+                            <span className="ml-auto flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-coral-500 text-white text-[10px] font-bold leading-none">
+                              {count > 99 ? '99+' : count}
+                            </span>
+                          ) : null
+                        })()}
                       </Link>
                     )
                   })}

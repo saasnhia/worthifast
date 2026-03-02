@@ -16,6 +16,10 @@
     {
       "path": "/api/integrations/sage/sync/cron",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/relances",
+      "schedule": "0 9 * * *"
     }
   ]
 }
