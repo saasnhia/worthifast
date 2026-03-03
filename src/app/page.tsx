@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   CheckCircle2, X, ChevronDown, ArrowRight, ScanLine, ArrowRightLeft,
-  BookOpen, Users2, Bell, Menu, Shield, Zap, Globe,
+  BookOpen, Users2, Bell, Menu, Shield, Zap, Globe, AlertTriangle,
 } from 'lucide-react'
 
 // ─────────────────────────────────────────────────────────────
@@ -17,16 +17,29 @@ function formatPrice(price: number): string {
   return price.toFixed(2).replace('.', ',')
 }
 
+/** Render a comparison cell based on emoji string value */
+function CellIcon({ val }: { val: string }) {
+  if (val === '✅') return <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+  if (val === '❌') return <X className="w-4 h-4 text-gray-300 mx-auto" />
+  if (val === '⚠️') return (
+    <span className="inline-flex items-center justify-center gap-1 text-xs text-amber-600 font-semibold">
+      <AlertTriangle className="w-3.5 h-3.5" />Partiel
+    </span>
+  )
+  if (val === '🔜') return <span className="text-xs text-amber-600 font-semibold">À venir</span>
+  return <span className="text-xs text-slate-400">{val}</span>
+}
+
 // ─────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────
 
 type ComparisonRow = {
-  critere: string
-  finsoft: boolean | 'soon'
-  pennylane: boolean
-  dext: boolean
-  sage: boolean
+  feature: string
+  finsoft: string
+  pennylane: string
+  dext: string
+  sage: string
 }
 
 interface FeatureItem { text: string; ok: boolean }
@@ -52,13 +65,18 @@ interface PlanCardData {
 // ─────────────────────────────────────────────────────────────
 
 const COMPARISON: ComparisonRow[] = [
-  { critere: 'OCR natif + IA',                       finsoft: true,   pennylane: true,  dext: true,  sage: false },
-  { critere: 'Portail client intégré',                finsoft: true,   pennylane: false, dext: false, sage: false },
-  { critere: 'PCG / BOFIP assistant',                 finsoft: true,   pennylane: false, dext: false, sage: false },
-  { critere: 'Gestion commerciale (devis, BC…)',      finsoft: true,   pennylane: true,  dext: false, sage: true  },
-  { critere: 'Hébergé en France',                     finsoft: true,   pennylane: false, dext: false, sage: false },
-  { critere: 'Agent IA réponse/résumé mails',         finsoft: true,   pennylane: false, dext: false, sage: false },
-  { critere: 'Mise en relation cabinet/entreprise',   finsoft: 'soon', pennylane: false, dext: false, sage: false },
+  { feature: 'OCR natif + IA',                        finsoft: '✅', pennylane: '✅', dext: '✅', sage: '⚠️' },
+  { feature: 'Rapprochement bancaire IA',              finsoft: '✅', pennylane: '✅', dext: '❌', sage: '⚠️' },
+  { feature: 'Gestion commerciale complète',           finsoft: '✅', pennylane: '✅', dext: '❌', sage: '✅' },
+  { feature: 'Portail client intégré',                 finsoft: '✅', pennylane: '✅', dext: '❌', sage: '❌' },
+  { feature: 'TVA + déclarations fiscales',            finsoft: '✅', pennylane: '✅', dext: '❌', sage: '✅' },
+  { feature: 'Relances automatiques',                  finsoft: '✅', pennylane: '✅', dext: '❌', sage: '⚠️' },
+  { feature: 'Notes de frais',                         finsoft: '✅', pennylane: '✅', dext: '✅', sage: '✅' },
+  { feature: 'Liasses fiscales',                       finsoft: '✅', pennylane: '✅', dext: '❌', sage: '✅' },
+  { feature: 'Facturation électronique 2026',          finsoft: '✅', pennylane: '✅', dext: '❌', sage: '⚠️' },
+  { feature: 'Hébergé en France (EU)',                 finsoft: '✅', pennylane: '✅', dext: '❌', sage: '⚠️' },
+  { feature: 'Agents IA sur mesure',                   finsoft: '✅', pennylane: '❌', dext: '❌', sage: '❌' },
+  { feature: 'Mise en relation cabinet/entreprise',    finsoft: '🔜', pennylane: '❌', dext: '❌', sage: '❌' },
 ]
 
 const FAQ_ITEMS = [
@@ -898,23 +916,24 @@ export default function HomePage() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {COMPARISON.map(row => (
-                  <tr key={row.critere} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 text-slate-700">{row.critere}</td>
-                    <td className="px-4 py-4 text-center">
-                      {row.finsoft === 'soon'
-                        ? <span className="text-xs text-amber-600 font-semibold">À venir</span>
-                        : row.finsoft
-                          ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
-                          : <X className="w-4 h-4 text-gray-300 mx-auto" />}
+                  <tr key={row.feature} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 text-slate-700">{row.feature}</td>
+                    <td className="px-4 py-4 text-center font-bold text-[#10B981]">
+                      <CellIcon val={row.finsoft} />
                     </td>
-                    <td className="px-4 py-4 text-center hidden sm:table-cell">{row.pennylane ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <X className="w-4 h-4 text-gray-300 mx-auto" />}</td>
-                    <td className="px-4 py-4 text-center hidden md:table-cell">{row.dext ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <X className="w-4 h-4 text-gray-300 mx-auto" />}</td>
-                    <td className="px-4 py-4 text-center hidden lg:table-cell">{row.sage ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <X className="w-4 h-4 text-gray-300 mx-auto" />}</td>
+                    <td className="px-4 py-4 text-center hidden sm:table-cell"><CellIcon val={row.pennylane} /></td>
+                    <td className="px-4 py-4 text-center hidden md:table-cell"><CellIcon val={row.dext} /></td>
+                    <td className="px-4 py-4 text-center hidden lg:table-cell"><CellIcon val={row.sage} /></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          <p className="mt-4 text-xs text-slate-400 text-center leading-relaxed">
+            ✅ Inclus · ⚠️ Partiel ou en option · ❌ Non disponible<br />
+            * Comparatif basé sur les offres publiques — mars 2026.<br />
+            Pennylane est PDP agréé DGFiP. FinSoft est Opérateur de Dématérialisation, agrément PDP en cours.
+          </p>
         </div>
       </section>
 
@@ -1029,29 +1048,31 @@ export default function HomePage() {
       {/* ── NOTRE HISTOIRE ── */}
       <section id="temoignages" className="py-24 px-4 bg-[#F8FAFC]">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full text-sm font-semibold text-emerald-700 mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#D1FAE5] rounded-full text-sm font-semibold text-[#065F46] mb-8">
             🎓 IAE Dijon — Université de Bourgogne
           </div>
 
-          <h2 className="text-3xl font-extrabold text-slate-900 mb-6">
-            Né à l&apos;IAE Dijon, conçu pour les professionnels
+          <h2 className="text-xl font-extrabold text-slate-900 mb-8">
+            Une idée née sur les bancs de la fac
           </h2>
 
-          <p className="text-slate-500 leading-relaxed mb-6 text-base">
-            FinSoft est développé au sein du département Finance-Comptabilité de l&apos;IAE de Dijon
-            (Université de Bourgogne). Notre équipe d&apos;étudiants en Licence de Gestion — option Finance
-            et de professionnels de l&apos;expertise comptable a conçu une solution ancrée dans les réalités
-            du terrain comptable français.
+          <p className="text-slate-500 leading-relaxed mb-6 text-base max-w-[600px] mx-auto">
+            FinSoft est née d&apos;un constat simple : les outils comptables existants
+            sont soit trop chers, soit trop rigides pour les indépendants et petits cabinets.
+            Deux étudiants en 3ᵉ année de Licence Gestion — option Finance à l&apos;IAE de Dijon
+            ont décidé d&apos;y remédier.
           </p>
 
-          <p className="text-slate-500 leading-relaxed mb-10 text-base">
-            Notre mission : mettre la technologie IA au service de l&apos;accompagnement comptable,
-            avec une rigueur académique et une vision pratique des besoins des cabinets modernes.
+          <p className="text-slate-500 leading-relaxed mb-10 text-base max-w-[600px] mx-auto">
+            Le projet a rapidement convaincu nos professeurs du département
+            Finance-Comptabilité, qui ont validé notre approche et nous ont accompagnés
+            dans la conception d&apos;une solution ancrée dans les réalités du terrain comptable français.
+            Notre mission : mettre la technologie IA au service des professionnels du chiffre,
+            sans compromis sur la simplicité.
           </p>
 
-          <div className="inline-flex items-center gap-2 text-sm text-slate-400 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-            Licence Gestion · Option Finance · Promotion 2026
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#D1FAE5] rounded-full text-sm font-semibold text-[#065F46]">
+            Licence Gestion · Option Finance · Promotion 2026 · IAE Dijon
           </div>
         </div>
       </section>
