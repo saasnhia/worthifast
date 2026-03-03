@@ -122,13 +122,3 @@ export async function getChiftJournalEntries(
   return data.data ?? []
 }
 
-/** Get OAuth URL for connecting Sage 50 via Chift */
-export function buildChiftConnectUrl(redirectUri: string, state: string): string {
-  const params = new URLSearchParams({
-    client_id: process.env.CHIFT_API_KEY ?? '',
-    redirect_uri: redirectUri,
-    state,
-    software: 'sage50',
-  })
-  return `${CHIFT_BASE}/oauth/authorize?${params}`
-}

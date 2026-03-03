@@ -39,6 +39,10 @@ export async function POST(req: NextRequest) {
     const { question, contexte = 'pcg' } = await req.json() as { question: string; contexte?: string }
     if (!question?.trim()) return NextResponse.json({ error: 'Question requise' }, { status: 400 })
 
+    if (question.length > 10_000) {
+      return NextResponse.json({ error: 'Question trop longue (max 10 000 caractères)' }, { status: 400 })
+    }
+
     const systemPrompt = SYSTEM_PROMPTS[contexte] ?? SYSTEM_PROMPTS.pcg
 
     // Si la question contient un numéro de compte, cherche dans pcg_sources

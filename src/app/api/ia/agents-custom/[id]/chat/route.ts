@@ -22,6 +22,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
     if (!message?.trim()) return NextResponse.json({ error: 'Message requis' }, { status: 400 })
 
+    if (message.length > 10_000) {
+      return NextResponse.json({ error: 'Message trop long (max 10 000 caractères)' }, { status: 400 })
+    }
+
     // Fetch agent with docs
     const { data: agent, error: agentErr } = await supabase
       .from('agents_ia_custom')

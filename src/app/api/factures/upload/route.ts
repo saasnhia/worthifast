@@ -12,6 +12,7 @@ import { suggestCategorization } from '@/lib/categorization/matcher';
 import { logAutomation } from '@/lib/automation/log';
 import type { ExtractedInvoiceData } from '@/types';
 import type { CategorizationRule } from '@/lib/categorization/matcher';
+import { rateLimit } from '@/lib/utils/rate-limit';
 
 // Helper: Extract text from PDF using pdf2json (pure JS, no worker issues)
 function extractTextFromPdf(pdfBuffer: Buffer): Promise<string> {
@@ -99,7 +100,7 @@ function extractInvoiceFieldsLocal(text: string): ExtractedInvoiceData {
   // Decode pdf2json URL-encoded output
   const decoded = decodePdfText(text);
 
-  console.log('[EXTRACTION] Texte brut (1500 premiers chars):', decoded.substring(0, 1500));
+  console.log('[EXTRACTION] Texte extrait:', decoded.length, 'caractères');
 
   const result: ExtractedInvoiceData = {
     montant_ht: null,
@@ -460,6 +461,10 @@ export async function POST(req: NextRequest) {
 
     const user_id = user.id;
 
+    if (!rateLimit(`upload:${user_id}`, 20, 60_000)) {
+      return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
+    }
+
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
@@ -563,7 +568,7 @@ export async function POST(req: NextRequest) {
 
     if (sirenMatch) {
       const siren = sirenMatch[1];
-      console.log('[FACTURE UPLOAD] SIREN detecte:', siren);
+      console.log('[FACTURE UPLOAD] SIREN detecté');
 
       try {
         const entrepriseInfo = await enrichirFournisseur(siren);
@@ -576,7 +581,7 @@ export async function POST(req: NextRequest) {
 
         tvaIntracom = entrepriseInfo.tva_intracom;
         if (tvaIntracom) {
-          console.log('[FACTURE UPLOAD] TVA intracom:', tvaIntracom);
+          console.log('[FACTURE UPLOAD] TVA intracom détectée');
         }
       } catch (error) {
         console.warn('[FACTURE UPLOAD] Impossible d\'enrichir le fournisseur:', error);
@@ -597,7 +602,7 @@ export async function POST(req: NextRequest) {
       ocr_raw_text: ocrResult.text,
       ocr_confidence: extractedData.confidence_score,
     };
-    console.log('[API] Données avant insertion DB:', JSON.stringify(insertData, null, 2));
+    console.log('[API] Insertion facture en cours');
     const { data: facture, error: dbError } = await supabase
       .from('factures')
       .insert(insertData)

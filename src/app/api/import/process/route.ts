@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { parseFEC, fecEntryToTransactionType, fecDateToISO, mapJournalToCategory } from '@/lib/parsers/fec-parser'
 import { parseExcelBatch } from '@/lib/parsers/excel-batch-parser'
 import { logAutomation } from '@/lib/automation/log'
+import { rateLimit } from '@/lib/utils/rate-limit'
 import type { ImportType } from '../detect/route'
 
 /**
@@ -21,6 +22,10 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    }
+
+    if (!rateLimit(`import:${user.id}`, 10, 60_000)) {
+      return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 })
     }
 
     const formData = await req.formData()

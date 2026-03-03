@@ -3,6 +3,7 @@ import type Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe/client'
 import { PLANS } from '@/lib/stripe/plans'
+import { rateLimit } from '@/lib/utils/rate-limit'
 
 /**
  * POST /api/stripe/checkout
@@ -11,6 +12,11 @@ import { PLANS } from '@/lib/stripe/plans'
  */
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ?? 'unknown'
+    if (!rateLimit(`checkout:${ip}`, 5, 60_000)) {
+      return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 })
+    }
+
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -47,7 +53,15 @@ export async function POST(req: NextRequest) {
       .eq('user_id', user.id)
       .maybeSingle()
 
-    const origin = req.headers.get('origin') ?? 'https://finpilote.vercel.app'
+    const VALID_ORIGINS = [
+      'https://finpilote.vercel.app',
+      process.env.NEXT_PUBLIC_APP_URL,
+      'http://localhost:3000',
+    ].filter(Boolean)
+    const clientOrigin = req.headers.get('origin')
+    const origin = clientOrigin && VALID_ORIGINS.includes(clientOrigin)
+      ? clientOrigin
+      : 'https://finpilote.vercel.app'
 
     const customerField: Pick<Stripe.Checkout.SessionCreateParams, 'customer' | 'customer_email'> =
       existing?.stripe_customer_id
@@ -62,7 +76,7 @@ export async function POST(req: NextRequest) {
       cancel_url:  `${origin}/#pricing`,
       metadata: { user_id: user.id, plan_id: planKey, billing },
       subscription_data: {
-        trial_period_days: 30,
+        trial_period_days: plan.trial_days ?? 30,
         metadata: { user_id: user.id, plan_id: planKey, billing },
       },
       payment_method_collection: 'always',

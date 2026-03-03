@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email-sender'
+import { escapeHtml } from '@/lib/utils/escape-html'
 
 async function getPortailByToken(token: string) {
   const supabase = await createClient()
@@ -68,8 +69,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tok
         void sendEmail({
           from: process.env.RESEND_FROM_EMAIL ?? 'noreply@finpilote.app',
           to: [cabinetUser.user.email],
-          subject: `Nouveau message de ${portail.client_nom}`,
-          html: `<p><strong>${portail.client_nom}</strong> vous a envoyé un message :</p><blockquote>${message}</blockquote>`,
+          subject: `Nouveau message de ${escapeHtml(portail.client_nom)}`,
+          html: `<p><strong>${escapeHtml(portail.client_nom)}</strong> vous a envoyé un message :</p><blockquote>${escapeHtml(message)}</blockquote>`,
         }).catch(() => {/* non-critical */})
       }
     } else {
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tok
         from: process.env.RESEND_FROM_EMAIL ?? 'noreply@finpilote.app',
         to: [portail.client_email],
         subject: 'Nouveau message de votre cabinet',
-        html: `<p>Votre cabinet vous a envoyé un message :</p><blockquote>${message}</blockquote>
+        html: `<p>Votre cabinet vous a envoyé un message :</p><blockquote>${escapeHtml(message)}</blockquote>
                <a href="${process.env.NEXT_PUBLIC_APP_URL ?? 'https://finpilote.vercel.app'}/portail/${token}">Répondre</a>`,
       }).catch(() => {/* non-critical */})
     }

@@ -83,6 +83,10 @@ const DEMO_DOSSIERS: Array<{ dossier: SeedDossier; statut: SeedStatut }> = [
  * Appelez cette URL depuis votre navigateur après connexion sur /login.
  */
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return new Response('Not found', { status: 404 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 

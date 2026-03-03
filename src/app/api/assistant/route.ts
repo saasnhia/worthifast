@@ -36,6 +36,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'conversation_id et message requis' }, { status: 400 })
     }
 
+    if (message.length > 10_000) {
+      return NextResponse.json({ error: 'Message trop long (max 10 000 caractères)' }, { status: 400 })
+    }
+
     // Get user plan
     const { data: profile } = await supabase
       .from('user_profiles')

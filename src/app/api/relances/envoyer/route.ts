@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getFacturesEnRetard, genererEmailRelance } from '@/lib/relances/engine'
 import { sendEmail } from '@/lib/email-sender'
+import { escapeHtml } from '@/lib/utils/escape-html'
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
       from: process.env.RESEND_FROM_EMAIL ?? 'noreply@finpilote.app',
       to: [facture.client_email],
       subject: `Relance facture ${facture.numero_facture} — Niveau ${niveau}`,
-      html: `<pre style="font-family:Arial;white-space:pre-wrap;">${contenu}</pre>`,
+      html: `<pre style="font-family:Arial;white-space:pre-wrap;">${escapeHtml(contenu)}</pre>`,
       text: contenu,
     })
 

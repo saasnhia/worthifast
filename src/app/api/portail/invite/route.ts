@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email-sender'
+import { escapeHtml } from '@/lib/utils/escape-html'
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,11 +36,11 @@ export async function POST(req: NextRequest) {
     await sendEmail({
       from: process.env.RESEND_FROM_EMAIL ?? 'noreply@finpilote.app',
       to: [client_email.trim()],
-      subject: `Votre espace collaboratif FinSoft — ${client_nom}`,
+      subject: `Votre espace collaboratif FinSoft — ${escapeHtml(client_nom)}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 24px;">
           <h2 style="color: #22D3A5;">Bienvenue sur votre espace client FinSoft</h2>
-          <p>Bonjour <strong>${client_nom}</strong>,</p>
+          <p>Bonjour <strong>${escapeHtml(client_nom)}</strong>,</p>
           <p>Votre cabinet comptable vous a invité à utiliser votre espace client sécurisé pour :</p>
           <ul>
             <li>📄 Déposer vos documents comptables</li>

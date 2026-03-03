@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email-sender'
+import { escapeHtml } from '@/lib/utils/escape-html'
 
 async function getPortailByToken(token: string) {
   const supabase = await createClient()
@@ -71,8 +72,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tok
         void sendEmail({
           from: process.env.RESEND_FROM_EMAIL ?? 'noreply@finpilote.app',
           to: [cabinetUser.user.email],
-          subject: `Nouveau document déposé — ${portail.client_nom}`,
-          html: `<p>${portail.client_nom} a déposé un nouveau document : <strong>${nom ?? 'Document'}</strong>.</p>
+          subject: `Nouveau document déposé — ${escapeHtml(portail.client_nom)}`,
+          html: `<p>${escapeHtml(portail.client_nom)} a déposé un nouveau document : <strong>${escapeHtml(nom ?? 'Document')}</strong>.</p>
                  <a href="${baseUrl}/portail/${portail.client_id ?? ''}">Voir le portail</a>`,
         }).catch(() => {/* non-critical */})
       }

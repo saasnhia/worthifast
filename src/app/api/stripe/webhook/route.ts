@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
           expand: ['items.data.price'],
         })
 
-        console.log('[webhook] subscription object:', JSON.stringify(subscription, null, 2))
+        console.log('[webhook] subscription:', { id: subscription.id, status: subscription.status })
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rawPeriodEnd = (subscription as any).current_period_end
@@ -77,11 +77,11 @@ export async function POST(req: NextRequest) {
           )
 
         if (error) {
-          console.error('[webhook] Supabase upsert error:', JSON.stringify(error))
+          console.error('[webhook] Supabase upsert error:', error.code)
           throw new Error(`Supabase upsert failed: ${error.message}`)
         }
 
-        console.log('[webhook] Subscription upserted for user:', userId)
+        console.log('[webhook] Subscription upserted successfully')
 
         await supabaseAdmin
           .from('user_profiles')

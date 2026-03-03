@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { triggerNouveauLead } from '@/lib/n8n/trigger'
+import { rateLimit } from '@/lib/utils/rate-limit'
 
 /**
  * POST /api/contact
@@ -10,6 +11,11 @@ import { triggerNouveauLead } from '@/lib/n8n/trigger'
  */
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ?? 'unknown'
+    if (!rateLimit(`contact:${ip}`, 3, 300_000)) {
+      return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 })
+    }
+
     const body = await req.json() as {
       nom?: string
       email?: string
