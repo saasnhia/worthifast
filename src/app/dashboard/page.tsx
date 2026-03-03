@@ -34,6 +34,29 @@ import { createClient } from '@/lib/supabase/client'
 import { toast } from 'react-hot-toast'
 import type { BalanceAgeeItem } from '../api/dashboard/summary/route'
 
+// ─── Category labels FR ──────────────────────────────────────────────────────
+
+const CATEGORY_LABELS: Record<string, string> = {
+  sales: 'Ventes',
+  other: 'Autre',
+  services: 'Services',
+  rent: 'Loyer',
+  insurance: 'Assurances',
+  salary: 'Salaires',
+  salaries: 'Salaires',
+  utilities: 'Charges',
+  transport: 'Transport',
+  subscriptions: 'Abonnements',
+  loan_payments: 'Emprunts',
+  supplies: 'Fournitures',
+  marketing: 'Marketing',
+}
+
+function translateCategory(cat: string | null): string {
+  if (!cat) return 'Non categorise'
+  return CATEGORY_LABELS[cat] ?? cat
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ProfileType = 'cabinet' | 'entreprise'
@@ -741,23 +764,26 @@ if (!authLoading && initialized && user && !isActive) {
               <p className="text-sm text-navy-400 py-6 text-center">Aucune transaction récente</p>
             ) : (
               <div className="space-y-1">
-                {transactions.map(t => (
-                  <div key={t.id} className="flex items-center gap-3 py-2 border-b border-navy-50 last:border-0">
-                    <div className={`p-1.5 rounded-lg ${t.amount >= 0 ? 'bg-emerald-100' : 'bg-red-100'}`}>
-                      {t.amount >= 0
-                        ? <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
-                        : <ArrowDownRight className="w-3.5 h-3.5 text-red-600" />
-                      }
+                {transactions.map(t => {
+                  const isCredit = t.amount > 0
+                  return (
+                    <div key={t.id} className="flex items-center gap-3 py-2 border-b border-navy-50 last:border-0">
+                      <div className={`p-1.5 rounded-lg ${isCredit ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                        {isCredit
+                          ? <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                          : <ArrowDownRight className="w-3.5 h-3.5 text-red-600" />
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-navy-800 truncate">{t.description}</p>
+                        <p className="text-[11px] text-navy-400">{formatDate(t.date)} &middot; {translateCategory(t.category)}</p>
+                      </div>
+                      <span className={`text-xs font-mono font-semibold ${isCredit ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {isCredit ? '+' : ''}{formatCurrency(t.amount)}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-navy-800 truncate">{t.description}</p>
-                      <p className="text-[11px] text-navy-400">{formatDate(t.date)} · {t.category ?? 'Non catégorisé'}</p>
-                    </div>
-                    <span className={`text-xs font-mono font-semibold ${t.amount >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {t.amount >= 0 ? '+' : ''}{formatCurrency(t.amount)}
-                    </span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </Card>

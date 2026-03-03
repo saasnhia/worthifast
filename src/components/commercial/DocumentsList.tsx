@@ -196,6 +196,11 @@ export function DocumentsList() {
             <Plus className="w-4 h-4" />
             Nouveau document
           </button>
+          <div className="mt-3">
+            <a href="/api/seed/demo" className="text-sm text-emerald-500 underline cursor-pointer">
+              &rarr; Charger des donnees de demonstration
+            </a>
+          </div>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">

@@ -172,7 +172,12 @@ export default function CataloguePage() {
           <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
             <Package className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="text-sm font-medium text-gray-700 mb-1">Aucun produit</p>
-            <p className="text-xs text-gray-500">Créez votre premier produit ou service</p>
+            <p className="text-xs text-gray-500">Creez votre premier produit ou service</p>
+            <div className="mt-3">
+              <a href="/api/seed/demo" className="text-sm text-emerald-500 underline cursor-pointer">
+                &rarr; Charger des donnees de demonstration
+              </a>
+            </div>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">

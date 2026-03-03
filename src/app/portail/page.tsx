@@ -120,6 +120,11 @@ export default function PortailDashboard() {
             <Button onClick={() => setShowInvite(true)} icon={<Plus className="w-4 h-4" />}>
               Inviter votre premier client
             </Button>
+            <div className="mt-3">
+              <a href="/api/seed/demo" className="text-sm text-emerald-500 underline cursor-pointer">
+                &rarr; Charger des donnees de demonstration
+              </a>
+            </div>
           </Card>
         ) : (
           <div className="grid gap-4">

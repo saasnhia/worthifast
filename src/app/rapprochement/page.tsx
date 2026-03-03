@@ -149,7 +149,7 @@ export default function RapprochementDashboardPage() {
             <div>
               <p className="text-sm text-navy-500">Total</p>
               <p className="text-2xl font-bold text-navy-900">
-                {rapprochementStats.total}
+                {(rapprochementStats.auto_valide + rapprochementStats.manuels) + rapprochementStats.suggestions + anomalyStats.ouvertes}
               </p>
             </div>
           </div>

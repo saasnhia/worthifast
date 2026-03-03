@@ -278,6 +278,11 @@ export default function NotesDefraisPage() {
             <div className="text-center py-12">
               <Receipt className="w-10 h-10 text-navy-200 mx-auto mb-3" />
               <p className="text-sm text-navy-400">Aucune note de frais</p>
+              <div className="mt-3">
+                <a href="/api/seed/demo" className="text-sm text-emerald-500 underline cursor-pointer">
+                  &rarr; Charger des donnees de demonstration
+                </a>
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -371,9 +376,9 @@ export default function NotesDefraisPage() {
           )}
         </Card>
 
-        {/* Barème kilométrique 2025 */}
+        {/* Bareme kilometrique */}
         <div className="mt-4 text-xs text-navy-400">
-          📍 Barème kilométrique 2025 : 5CV → 0,548€/km · 6CV → 0,574€/km · 7CV+ → 0,601€/km
+          Bareme kilometrique 2026 : en attente de publication officielle. Bareme 2025 applique par defaut (5CV &rarr; 0,548&euro;/km &middot; 6CV &rarr; 0,574&euro;/km &middot; 7CV+ &rarr; 0,601&euro;/km).
         </div>
       </div>
 

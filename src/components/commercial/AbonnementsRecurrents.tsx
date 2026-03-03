@@ -155,7 +155,12 @@ export function AbonnementsRecurrents() {
         <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
           <RefreshCw className="w-10 h-10 text-gray-300 mx-auto mb-3" />
           <p className="text-sm font-medium text-gray-700 mb-1">Aucun abonnement</p>
-          <p className="text-xs text-gray-500">Automatisez votre facturation récurrente</p>
+          <p className="text-xs text-gray-500">Automatisez votre facturation recurrente</p>
+          <div className="mt-3">
+            <a href="/api/seed/demo" className="text-sm text-emerald-500 underline cursor-pointer">
+              &rarr; Charger des donnees de demonstration
+            </a>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">

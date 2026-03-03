@@ -262,8 +262,13 @@ export default function AchatsPage() {
               <p className="text-sm text-navy-400">Aucune demande d&apos;achat</p>
               <button onClick={() => setShowAdd(true)} disabled={!isEssentielPlus}
                 className="mt-3 text-xs text-emerald-600 hover:underline disabled:opacity-50">
-                Créer la première →
+                Creer la premiere &rarr;
               </button>
+              <div className="mt-2">
+                <a href="/api/seed/demo" className="text-sm text-emerald-500 underline cursor-pointer">
+                  &rarr; Charger des donnees de demonstration
+                </a>
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto">
