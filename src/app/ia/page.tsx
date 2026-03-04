@@ -228,6 +228,39 @@ function AgentCustomCard({ agent }: { agent: AgentCustom }) {
   )
 }
 
+interface DossierOption { id: string; nom: string }
+
+function getDateSuggestions(): { label: string; question: string }[] {
+  const now = new Date()
+  const month = now.getMonth() // 0-indexed
+  const suggestions: { label: string; question: string }[] = []
+
+  // TVA CA3 reminder around declaration periods (monthly or quarterly)
+  if ([0, 3, 6, 9].includes(month)) {
+    suggestions.push({ label: 'TVA CA3 du trimestre', question: 'Quelles sont les échéances et modalités de déclaration de TVA CA3 pour le trimestre en cours ?' })
+  }
+
+  // Year-end closing (Nov-Feb)
+  if (month >= 10 || month <= 1) {
+    suggestions.push({ label: 'Clôture annuelle', question: 'Quelles sont les écritures de clôture obligatoires en fin d\'exercice ? (provisions, amortissements, régularisations)' })
+  }
+
+  // CFE payment (Oct-Dec)
+  if (month >= 9 && month <= 11) {
+    suggestions.push({ label: 'CFE — Échéance', question: 'Quelles sont les échéances de paiement de la CFE et les conditions d\'exonération ?' })
+  }
+
+  // IS acomptes (Mar, Jun, Sep, Dec)
+  if ([2, 5, 8, 11].includes(month)) {
+    suggestions.push({ label: 'Acompte IS', question: 'Comment calculer les acomptes d\'impôt sur les sociétés ? Quelles sont les dates limites ?' })
+  }
+
+  // Always show a general suggestion
+  suggestions.push({ label: 'Liasse fiscale', question: 'Quels sont les formulaires obligatoires de la liasse fiscale pour une SAS au régime réel normal ?' })
+
+  return suggestions.slice(0, 3)
+}
+
 function PCGBOFIPTab() {
   const [contexte, setContexte] = useState<'pcg' | 'bofip' | 'cgi'>('pcg')
   const [question, setQuestion] = useState('')
@@ -235,6 +268,16 @@ function PCGBOFIPTab() {
   const [sourcesTrouvees, setSourcesTrouvees] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [dossiers, setDossiers] = useState<DossierOption[]>([])
+  const [selectedDossier, setSelectedDossier] = useState<string>('')
+  const dateSuggestions = getDateSuggestions()
+
+  useEffect(() => {
+    fetch('/api/dossiers')
+      .then(r => r.json())
+      .then(d => { if (d.success && d.dossiers) setDossiers(d.dossiers.map((ds: { id: string; nom: string }) => ({ id: ds.id, nom: ds.nom }))) })
+      .catch(() => {})
+  }, [])
 
   const ask = async () => {
     if (!question.trim() || loading) return
@@ -245,7 +288,7 @@ function PCGBOFIPTab() {
       const res = await fetch('/api/ia/pcg-bofip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: question.trim(), contexte }),
+        body: JSON.stringify({ question: question.trim(), contexte, ...(selectedDossier && { dossier_id: selectedDossier }) }),
       })
       const data = await res.json()
       if (data.success) {
@@ -292,6 +335,37 @@ function PCGBOFIPTab() {
             }`}
           >
             {ctx === 'pcg' ? 'Plan Comptable (PCG)' : ctx === 'bofip' ? 'BOFIP Fiscal' : 'Code Général des Impôts'}
+          </button>
+        ))}
+      </div>
+
+      {/* Dossier context selector */}
+      {dossiers.length > 0 && (
+        <div className="flex items-center gap-3">
+          <label className="text-xs font-medium text-gray-500">Contexte dossier :</label>
+          <select
+            value={selectedDossier}
+            onChange={e => setSelectedDossier(e.target.value)}
+            className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Aucun (question générale)</option>
+            {dossiers.map(d => (
+              <option key={d.id} value={d.id}>{d.nom}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Date-based suggestions */}
+      <div className="flex flex-wrap gap-2">
+        <span className="text-xs text-gray-400 self-center mr-1">Suggestions :</span>
+        {dateSuggestions.map(s => (
+          <button
+            key={s.label}
+            onClick={() => setQuestion(s.question)}
+            className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+          >
+            {s.label}
           </button>
         ))}
       </div>

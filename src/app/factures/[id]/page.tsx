@@ -7,7 +7,8 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import type { FactureClient, StatutPaiement } from '@/types'
 import { calculTotaux } from '@/lib/factures/calculs'
-import { ChevronRight, Pencil, Printer, Copy, Trash2, Loader2 } from 'lucide-react'
+import { ChevronRight, Pencil, Printer, Copy, Trash2, Loader2, CheckCircle, Link2, CreditCard } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import Link from 'next/link'
 
 const STATUT_LABELS: Record<StatutPaiement, string> = {
@@ -31,6 +32,9 @@ export default function FactureDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [markingPaid, setMarkingPaid] = useState(false)
+  const [generatingLink, setGeneratingLink] = useState(false)
+  const [paymentLinkUrl, setPaymentLinkUrl] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/factures/clients/${id}`)
@@ -42,6 +46,55 @@ export default function FactureDetailPage() {
       .catch(() => setError('Erreur réseau'))
       .finally(() => setLoading(false))
   }, [id])
+
+  const handleMarkPaid = async () => {
+    if (!facture) return
+    setMarkingPaid(true)
+    try {
+      const res = await fetch(`/api/factures/clients/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          statut_paiement: 'payee',
+          montant_paye: facture.montant_ttc,
+          date_dernier_paiement: new Date().toISOString().split('T')[0],
+        }),
+      })
+      const d = await res.json()
+      if (d.success) {
+        setFacture(d.facture)
+        toast.success('Facture marquée comme payée')
+      } else {
+        toast.error(d.error ?? 'Erreur')
+      }
+    } catch { toast.error('Erreur réseau') }
+    setMarkingPaid(false)
+  }
+
+  const handleGeneratePaymentLink = async () => {
+    if (!facture) return
+    setGeneratingLink(true)
+    try {
+      const res = await fetch('/api/stripe/payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: facture.montant_ttc,
+          invoiceId: facture.id,
+          description: `Facture ${facture.numero_facture}`,
+        }),
+      })
+      const d = await res.json()
+      if (d.success) {
+        setPaymentLinkUrl(d.url)
+        await navigator.clipboard.writeText(d.url)
+        toast.success('Lien de paiement copié !')
+      } else {
+        toast.error(d.error ?? 'Erreur Stripe')
+      }
+    } catch { toast.error('Erreur réseau') }
+    setGeneratingLink(false)
+  }
 
   const handleDelete = async () => {
     if (!facture || !confirm(`Supprimer la facture ${facture.numero_facture} ?`)) return
@@ -124,6 +177,28 @@ export default function FactureDetailPage() {
           >
             Dupliquer
           </Button>
+          {facture.statut_paiement !== 'payee' && (
+            <Button
+              variant="primary"
+              size="sm"
+              loading={markingPaid}
+              icon={<CheckCircle className="w-4 h-4" />}
+              onClick={handleMarkPaid}
+            >
+              Marquer payée
+            </Button>
+          )}
+          {facture.statut_paiement !== 'payee' && (
+            <Button
+              variant="outline"
+              size="sm"
+              loading={generatingLink}
+              icon={<CreditCard className="w-4 h-4" />}
+              onClick={handleGeneratePaymentLink}
+            >
+              Lien de paiement
+            </Button>
+          )}
           <Button
             variant="danger"
             size="sm"
@@ -134,6 +209,23 @@ export default function FactureDetailPage() {
             Supprimer
           </Button>
         </div>
+
+        {/* Payment link banner */}
+        {paymentLinkUrl && (
+          <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl mb-6">
+            <Link2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-emerald-800">Lien de paiement actif</p>
+              <p className="text-xs font-mono text-emerald-600 truncate">{paymentLinkUrl}</p>
+            </div>
+            <button
+              onClick={() => { void navigator.clipboard.writeText(paymentLinkUrl); toast.success('Copié !') }}
+              className="text-xs px-2 py-1 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+            >
+              Copier
+            </button>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Infos facture */}

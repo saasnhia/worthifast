@@ -36,14 +36,36 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
-    const { question, contexte = 'pcg' } = await req.json() as { question: string; contexte?: string }
+    const { question, contexte = 'pcg', dossier_id } = await req.json() as { question: string; contexte?: string; dossier_id?: string }
     if (!question?.trim()) return NextResponse.json({ error: 'Question requise' }, { status: 400 })
 
     if (question.length > 10_000) {
       return NextResponse.json({ error: 'Question trop longue (max 10 000 caractères)' }, { status: 400 })
     }
 
-    const systemPrompt = SYSTEM_PROMPTS[contexte] ?? SYSTEM_PROMPTS.pcg
+    let systemPrompt = SYSTEM_PROMPTS[contexte] ?? SYSTEM_PROMPTS.pcg
+
+    // Inject dossier context if available
+    let dossierContext = ''
+    if (dossier_id) {
+      const { data: dossier } = await supabase
+        .from('dossiers')
+        .select('nom, forme_juridique, regime_tva, code_naf, chiffre_affaires')
+        .eq('id', dossier_id)
+        .eq('cabinet_id', user.id)
+        .single()
+
+      if (dossier) {
+        dossierContext = `\n\nCONTEXTE DU DOSSIER CLIENT :\n` +
+          `- Nom : ${dossier.nom ?? 'Non renseigné'}\n` +
+          `- Forme juridique : ${dossier.forme_juridique ?? 'Non renseignée'}\n` +
+          `- Régime TVA : ${dossier.regime_tva ?? 'Non renseigné'}\n` +
+          `- Code NAF : ${dossier.code_naf ?? 'Non renseigné'}\n` +
+          `- CA : ${dossier.chiffre_affaires ? dossier.chiffre_affaires + ' €' : 'Non renseigné'}\n` +
+          `Adapte tes réponses à ce contexte spécifique.`
+        systemPrompt += dossierContext
+      }
+    }
 
     // Si la question contient un numéro de compte, cherche dans pcg_sources
     let pcgContext = ''

@@ -48,13 +48,15 @@ const CATEGORIES: Category[] = [
   },
   {
     name: '\u{1F9FE} Factures & OCR',
-    scoreFinSoft: 7,
+    scoreFinSoft: 8,
     scorePennylane: 9,
     winner: 'pennylane',
     forcesFinSoft: [
       'OCR intelligent avec extraction automatique',
       'Saisie manuelle factures clients (Factur-X)',
       'Catégorisation automatique PCG',
+      'Lien de paiement Stripe intégré',
+      'Suivi statut paiement (marquer payée, partiellement payée)',
     ],
     faiblessesPennylane: [
       'Tarification élevée pour gros volumes',
@@ -66,19 +68,20 @@ const CATEGORIES: Category[] = [
     ],
     faiblessesFinSoft: [
       'Pas de collecte automatique fournisseurs',
-      'Workflow de validation moins avancé',
     ],
     analyse:
-      "Pennylane excelle sur la chaîne complète de traitement des factures grâce à la collecte automatique et au workflow de validation. FinSoft compense avec l'OCR intelligent et la facturation Factur-X native.",
+      "Pennylane excelle sur la chaîne complète de traitement des factures. FinSoft compense avec l'OCR intelligent, la facturation Factur-X native, et le lien de paiement Stripe intégré pour encaisser directement.",
   },
   {
     name: '\u{1F916} Assistant IA',
-    scoreFinSoft: 7,
+    scoreFinSoft: 8,
     scorePennylane: 9.5,
     winner: 'pennylane',
     forcesFinSoft: [
       'IA spécialisée PCG, BOFIP et CGI',
       'Agents IA personnalisables par cabinet',
+      'Contexte dossier injecté automatiquement (forme juridique, régime TVA)',
+      'Suggestions contextuelles par période (TVA, clôture, CFE, IS)',
       'Données traitées en Europe (RGPD)',
     ],
     faiblessesPennylane: [
@@ -91,10 +94,10 @@ const CATEGORIES: Category[] = [
       'Suggestions contextuelles temps réel',
     ],
     faiblessesFinSoft: [
-      'IA contextuelle sur données du dossier prévue T3 2026',
+      'IA conversationnelle moins aboutie que Pennylane',
     ],
     analyse:
-      "FinSoft cible les cabinets qui veulent un outil comptable solide avec une IA réglementaire (PCG, BOFIP, CGI) — pas un chatbot généraliste. L'assistant Pennylane est plus large mais moins spécialisé sur le droit fiscal français. La roadmap FinSoft prévoit l'IA contextuelle sur les données du dossier pour T3 2026.",
+      "FinSoft cible les cabinets qui veulent un outil comptable solide avec une IA réglementaire (PCG, BOFIP, CGI) contextualisée sur le dossier client. L'assistant Pennylane est plus large mais moins spécialisé sur le droit fiscal français.",
   },
   {
     name: '\u{1F3E6} Banque & rapprochement',
@@ -122,13 +125,15 @@ const CATEGORIES: Category[] = [
   },
   {
     name: '\u{1F4D2} Production comptable',
-    scoreFinSoft: 7,
+    scoreFinSoft: 8,
     scorePennylane: 8,
     winner: 'pennylane',
     forcesFinSoft: [
       'TVA CA3 automatique conforme',
       'Export FEC certifié DGFiP',
       'Module audit avec seuils de significativité',
+      'Balance Générale avec comparaison N-1',
+      'Export Excel balance et écritures',
     ],
     faiblessesPennylane: [
       'FEC export moins paramétrable',
@@ -141,10 +146,9 @@ const CATEGORIES: Category[] = [
     ],
     faiblessesFinSoft: [
       'Lettrage avancé prévu T3 2026',
-      'Gestion multi-exercice en développement',
     ],
     analyse:
-      "Pennylane a l'avantage sur la production comptable au quotidien grâce au workflow collaboratif et au lettrage. FinSoft compense avec le module audit et l'export FEC certifié.",
+      "FinSoft et Pennylane sont désormais au coude-à-coude sur la production comptable. FinSoft ajoute la balance N-1 et l'export Excel, Pennylane garde l'avantage sur le lettrage et le workflow collaboratif.",
   },
   {
     name: '\u{1F514} Relances & recouvrement',
@@ -217,26 +221,29 @@ const CATEGORIES: Category[] = [
   },
   {
     name: '\u{1F465} Portail client',
-    scoreFinSoft: 7,
+    scoreFinSoft: 8,
     scorePennylane: 8,
     winner: 'pennylane',
     forcesFinSoft: [
       'Espace partagé sécurisé par client',
-      'Dépôt de documents par le client',
-      'Accès aux factures en ligne',
+      'Dépôt de documents avec 4 statuts (en attente, reçu, traité, validé)',
+      'Badge "Nouveau" sur les documents récents',
+      'Notification email cabinet ↔ client bidirectionnelle',
+      'Messagerie intégrée cabinet-client',
       'Lien unique par dossier client',
     ],
-    faiblessesPennylane: [],
+    faiblessesPennylane: [
+      'Pas de messagerie intégrée dans le portail',
+    ],
     forcesPennylane: [
       'Portail client mature avec historique complet',
       'Signature électronique intégrée',
     ],
     faiblessesFinSoft: [
-      'Interface portail moins mature que Pennylane',
       'Pas encore de signature électronique intégrée',
     ],
     analyse:
-      "FinSoft propose les fondamentaux du portail client (partage de documents, accès factures). La signature électronique est prévue sur la roadmap.",
+      "FinSoft rattrape Pennylane sur le portail avec les statuts de documents, la messagerie intégrée et les notifications email bidirectionnelles. Pennylane conserve l'avantage de la signature électronique.",
   },
   {
     name: '\u{1F504} Migration & onboarding',
@@ -266,10 +273,10 @@ const CATEGORIES: Category[] = [
 // ─────────────────────────────────────────────────────────────
 
 const RECOMMENDATIONS = [
-  'Sparklines sur les KPIs — prévu roadmap Q2 2026',
   'Connexion bancaire Open Banking — en cours de développement',
   'Lettrage avancé et multi-exercice — prévu T3 2026',
   'Signature électronique portail client — sur la roadmap',
+  'IA conversationnelle avec mémoire de contexte — prévu T4 2026',
 ]
 
 // ─────────────────────────────────────────────────────────────

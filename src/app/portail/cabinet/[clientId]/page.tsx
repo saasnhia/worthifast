@@ -110,22 +110,35 @@ export default function PortailClientPage() {
             {docs.length === 0 ? (
               <Card className="text-center py-12 text-navy-500 text-sm">Aucun document déposé</Card>
             ) : (
-              docs.map(doc => (
-                <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-navy-100 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-navy-400" />
-                    <div>
-                      <p className="font-medium text-navy-900">{doc.nom}</p>
-                      <p className="text-xs text-navy-400">
-                        {doc.uploaded_by === 'client' ? '📤 Client' : '📥 Cabinet'} · {new Date(doc.created_at).toLocaleDateString('fr-FR')}
-                      </p>
+              docs.map(doc => {
+                const isNew = (Date.now() - new Date(doc.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000
+                const STATUT_MAP: Record<string, { label: string; cls: string }> = {
+                  en_attente: { label: 'En attente', cls: 'bg-amber-100 text-amber-800' },
+                  recu: { label: 'Reçu', cls: 'bg-blue-100 text-blue-800' },
+                  traite: { label: 'Traité', cls: 'bg-indigo-100 text-indigo-800' },
+                  valide: { label: 'Validé', cls: 'bg-emerald-100 text-emerald-800' },
+                }
+                const st = STATUT_MAP[doc.statut] ?? { label: doc.statut, cls: 'bg-gray-100 text-gray-800' }
+                return (
+                  <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-navy-100 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-navy-400" />
+                      <div>
+                        <p className="font-medium text-navy-900">
+                          {doc.nom}
+                          {isNew && <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white uppercase">Nouveau</span>}
+                        </p>
+                        <p className="text-xs text-navy-400">
+                          {doc.uploaded_by === 'client' ? '📤 Client' : '📥 Cabinet'} · {new Date(doc.created_at).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
                     </div>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${st.cls}`}>
+                      {st.label}
+                    </span>
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${doc.statut === 'valide' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                    {doc.statut === 'en_attente' ? 'En attente' : doc.statut}
-                  </span>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         )}

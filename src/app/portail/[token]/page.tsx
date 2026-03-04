@@ -143,18 +143,31 @@ export default function PortailClientPublicPage() {
             <div className="space-y-2">
               {docs.length === 0 ? (
                 <p className="text-center text-gray-400 text-sm py-6">Aucun document</p>
-              ) : docs.map(doc => (
-                <div key={doc.id} className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-xl">
-                  <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{doc.nom}</p>
-                    <p className="text-xs text-gray-400">{doc.uploaded_by === 'client' ? '📤 Envoyé par vous' : '📥 Du cabinet'} · {new Date(doc.created_at).toLocaleDateString('fr-FR')}</p>
+              ) : docs.map(doc => {
+                const isNew = (Date.now() - new Date(doc.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000
+                const STATUT_MAP: Record<string, { label: string; cls: string }> = {
+                  en_attente: { label: 'En attente', cls: 'bg-amber-100 text-amber-800' },
+                  recu: { label: 'Reçu', cls: 'bg-blue-100 text-blue-800' },
+                  traite: { label: 'Traité', cls: 'bg-indigo-100 text-indigo-800' },
+                  valide: { label: 'Validé', cls: 'bg-emerald-100 text-emerald-800' },
+                }
+                const st = STATUT_MAP[doc.statut] ?? { label: doc.statut, cls: 'bg-gray-100 text-gray-800' }
+                return (
+                  <div key={doc.id} className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-xl">
+                    <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {doc.nom}
+                        {isNew && <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white uppercase">Nouveau</span>}
+                      </p>
+                      <p className="text-xs text-gray-400">{doc.uploaded_by === 'client' ? '📤 Envoyé par vous' : '📥 Du cabinet'} · {new Date(doc.created_at).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${st.cls}`}>
+                      {st.label}
+                    </span>
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${doc.statut === 'valide' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                    {doc.statut === 'en_attente' ? 'En attente' : doc.statut}
-                  </span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
