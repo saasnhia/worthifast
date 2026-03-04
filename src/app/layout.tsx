@@ -8,15 +8,15 @@ export const metadata: Metadata = {
   keywords: ['comptabilité', 'OCR factures', 'SIREN', 'TVA intracommunautaire', 'VIES', 'rapprochement bancaire', 'PME', 'cabinet comptable', 'RGPD', 'Dijon'],
   authors: [{ name: 'Worthify' }],
   icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: '/favicon.svg',
+    apple: '/logo-icon.svg',
   },
   openGraph: {
     title: 'Worthify — Comptabilité automatisée. En local.',
     description: 'SaaS comptable local RGPD. OCR factures, TVA, rapprochement bancaire. Dès 299€.',
     type: 'website',
     locale: 'fr_FR',
-    images: ['/logo.png'],
+    images: ['/logo.svg'],
   },
 }
 

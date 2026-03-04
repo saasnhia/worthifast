@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { PlanBadge } from '@/components/plan/PlanGate'
 import { UserCountBadge } from '@/components/plan/UserCountBadge'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -394,8 +395,9 @@ export function Sidebar() {
       <div className="px-3 py-3 border-t border-white/5 flex flex-col items-center gap-2">
         <UserCountBadge />
         <PlanBadge />
+        <Image src="/logo-white.svg" alt="Worthify" width={100} height={24} className="h-5 w-auto opacity-40" />
         <p className="text-[10px] text-neutral-600 text-center">
-          Worthify v2.1
+          v2.1
         </p>
       </div>
     </aside>

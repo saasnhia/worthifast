@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   CheckCircle2, ChevronDown, ArrowRight, ScanLine, ArrowRightLeft,
@@ -51,10 +52,7 @@ export default function HomePage() {
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">W</span>
-            </div>
-            <span className="font-bold text-xl text-slate-900">Worthify</span>
+            <Image src="/logo.svg" alt="Worthify" width={140} height={34} priority className="h-8 w-auto" />
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
@@ -447,10 +445,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">W</span>
-                </div>
-                <span className="font-bold text-xl text-white">Worthify</span>
+                <Image src="/logo-white.svg" alt="Worthify" width={140} height={34} className="h-8 w-auto" />
               </div>
               <p className="text-sm max-w-xs leading-relaxed">
                 La solution comptable intelligente pour les cabinets d&apos;expertise comptable et PME françaises.

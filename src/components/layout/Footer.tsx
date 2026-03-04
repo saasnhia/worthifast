@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export function Footer() {
   return (
@@ -8,12 +9,7 @@ export function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">W</span>
-              </div>
-              <span className="font-display font-bold text-xl text-white">
-                Worthify
-              </span>
+              <Image src="/logo-white.svg" alt="Worthify" width={140} height={34} className="h-8 w-auto" />
             </Link>
             <p className="text-sm text-navy-400 max-w-sm">
               La solution simple et efficace pour piloter la rentabilité de votre entreprise. 
