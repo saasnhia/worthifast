@@ -15,11 +15,18 @@ export async function POST() {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
     }
 
-    // Vérifier s'il y a déjà des écritures
-    const { count: existing } = await supabase
+    // Vérifier si la table existe et s'il y a déjà des écritures
+    const { count: existing, error: checkError } = await supabase
       .from('ecritures_comptables')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
+
+    if (checkError) {
+      return NextResponse.json({
+        error: `Table ecritures_comptables inaccessible: ${checkError.message}. Vérifiez que la migration 034 est appliquée.`,
+        hint: 'Exécutez: npx supabase db push',
+      }, { status: 500 })
+    }
 
     if ((existing ?? 0) > 10) {
       return NextResponse.json({

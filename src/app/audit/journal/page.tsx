@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 import { AppShell } from '@/components/layout'
 import { Card, Button } from '@/components/ui'
 import {
@@ -303,10 +304,21 @@ export default function JournalPage() {
                   onClick={async () => {
                     setLoading(true)
                     try {
-                      await fetch('/api/comptabilite/ecritures/seed', { method: 'POST' })
-                      fetchEcritures()
-                    } catch { /* silent */ }
-                    setLoading(false)
+                      const res = await fetch('/api/comptabilite/ecritures/seed', { method: 'POST' })
+                      const data = await res.json() as { success?: boolean; count?: number; message?: string; error?: string }
+                      if (data.success) {
+                        toast.success(`${data.count ?? 0} écritures chargées`)
+                        fetchEcritures()
+                      } else {
+                        toast.error(data.error ?? 'Erreur lors du seed')
+                        console.error('Seed error:', data)
+                        setLoading(false)
+                      }
+                    } catch (err) {
+                      toast.error('Erreur réseau — vérifiez la console')
+                      console.error('Seed fetch error:', err)
+                      setLoading(false)
+                    }
                   }}
                   icon={<BookOpen className="w-4 h-4" />}
                 >
