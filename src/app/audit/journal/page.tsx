@@ -225,18 +225,32 @@ export default function JournalPage() {
         {/* Filtres */}
         <Card className="mb-4">
           <div className="flex flex-wrap items-center gap-3">
-            <Filter className="w-4 h-4 text-neutral-500" />
-            {/* Journal */}
-            <select
-              value={journal}
-              onChange={e => setJournal(e.target.value)}
-              className="bg-brand-dark border border-white/10 text-neutral-300 text-sm rounded-lg px-3 py-1.5 focus:ring-brand-green-primary focus:border-brand-green-primary"
-            >
-              <option value="">Tous journaux</option>
+            <Filter className="w-4 h-4 text-neutral-400" />
+            {/* Journal pills */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setJournal('')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors ${
+                  journal === '' ? 'bg-white/10 text-white border-white/20' : 'text-neutral-500 border-transparent hover:text-neutral-300'
+                }`}
+              >
+                Tous
+              </button>
               {Object.entries(JOURNAL_LABELS).map(([code, label]) => (
-                <option key={code} value={code}>{code} — {label}</option>
+                <button
+                  key={code}
+                  onClick={() => setJournal(journal === code ? '' : code)}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors ${
+                    journal === code
+                      ? JOURNAL_COLORS[code]
+                      : 'text-neutral-500 border-transparent hover:text-neutral-300'
+                  }`}
+                  title={label}
+                >
+                  {code}
+                </button>
               ))}
-            </select>
+            </div>
             {/* Dates */}
             <div className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5 text-neutral-500" />
@@ -277,42 +291,64 @@ export default function JournalPage() {
           ) : ecritures.length === 0 ? (
             <div className="text-center py-16">
               <BookOpen className="w-10 h-10 text-neutral-600 mx-auto mb-3" />
-              <p className="text-neutral-400 mb-2">Aucune écriture comptable</p>
-              <p className="text-neutral-500 text-sm mb-4">Créez votre première écriture ou importez un FEC</p>
-              <Button variant="primary" size="sm" onClick={() => setShowModal(true)} icon={<Plus className="w-4 h-4" />}>
-                Nouvelle écriture
-              </Button>
+              <p className="text-neutral-300 mb-2 font-medium">Aucune écriture comptable</p>
+              <p className="text-neutral-500 text-sm mb-6">Créez votre première écriture, importez un FEC, ou chargez les données de démonstration.</p>
+              <div className="flex items-center justify-center gap-3">
+                <Button variant="primary" size="sm" onClick={() => setShowModal(true)} icon={<Plus className="w-4 h-4" />}>
+                  Nouvelle écriture
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    setLoading(true)
+                    try {
+                      await fetch('/api/comptabilite/ecritures/seed', { method: 'POST' })
+                      fetchEcritures()
+                    } catch { /* silent */ }
+                    setLoading(false)
+                  }}
+                  icon={<BookOpen className="w-4 h-4" />}
+                >
+                  Charger données démo
+                </Button>
+              </div>
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-white/5 bg-white/[0.02]">
-                      <th className="px-3 py-2.5 text-left text-xs font-medium text-neutral-500">Date</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-medium text-neutral-500">N°</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-medium text-neutral-500">Journal</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-medium text-neutral-500">Compte</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-medium text-neutral-500">Libellé</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-medium text-neutral-500">Pièce</th>
-                      <th className="px-3 py-2.5 text-right text-xs font-medium text-neutral-500">Débit</th>
-                      <th className="px-3 py-2.5 text-right text-xs font-medium text-neutral-500">Crédit</th>
+                    <tr className="border-b border-white/10 bg-white/[0.04]">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Date</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">N°</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Journal</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Compte</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Libellé</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Pièce</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-emerald-500 uppercase tracking-wider">Débit</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-rose-400 uppercase tracking-wider">Crédit</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {ecritures.map(e => (
-                      <tr key={e.id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="px-3 py-2 text-neutral-400 text-xs font-mono">{formatDate(e.date_ecriture)}</td>
-                        <td className="px-3 py-2 text-neutral-300 text-xs font-mono">{e.ecriture_num}</td>
-                        <td className="px-3 py-2">
-                          <span className={`inline-flex px-1.5 py-0.5 text-[10px] font-semibold rounded border ${JOURNAL_COLORS[e.journal_code] ?? 'bg-neutral-500/10 text-neutral-400'}`}>
+                  <tbody>
+                    {ecritures.map((e, idx) => (
+                      <tr
+                        key={e.id}
+                        className={`border-b border-white/[0.04] hover:bg-blue-500/[0.06] transition-colors ${
+                          idx % 2 === 0 ? 'bg-white/[0.015]' : ''
+                        }`}
+                      >
+                        <td className="px-4 py-2.5 text-neutral-300 text-xs font-mono">{formatDate(e.date_ecriture)}</td>
+                        <td className="px-3 py-2.5 text-neutral-400 text-xs font-mono">{e.ecriture_num}</td>
+                        <td className="px-3 py-2.5">
+                          <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold rounded border ${JOURNAL_COLORS[e.journal_code] ?? 'bg-neutral-500/10 text-neutral-400'}`}>
                             {e.journal_code}
                           </span>
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2.5">
                           <Link
                             href={`/audit/grand-livre?compte=${e.compte_num}`}
-                            className="text-brand-green-action hover:underline text-xs font-mono"
+                            className="text-brand-green-action hover:underline text-xs font-mono font-semibold"
                           >
                             {e.compte_num}
                           </Link>
@@ -320,37 +356,47 @@ export default function JournalPage() {
                             <span className="ml-1.5 text-neutral-500 text-xs">{e.compte_lib}</span>
                           )}
                         </td>
-                        <td className="px-3 py-2 text-neutral-300 text-xs max-w-[250px] truncate">{e.libelle}</td>
-                        <td className="px-3 py-2 text-neutral-500 text-xs font-mono">{e.piece_ref ?? '-'}</td>
-                        <td className="px-3 py-2 text-right font-mono text-xs">
+                        <td className="px-3 py-2.5 text-neutral-200 text-xs max-w-[280px] truncate">{e.libelle}</td>
+                        <td className="px-3 py-2.5 text-neutral-500 text-xs font-mono">{e.piece_ref ?? ''}</td>
+                        <td className="px-4 py-2.5 text-right font-mono text-xs">
                           {Number(e.debit) > 0 ? (
-                            <span className="text-neutral-200">{formatEuro(Number(e.debit))}</span>
+                            <span className="text-emerald-400 font-semibold">{formatEuro(Number(e.debit))}</span>
                           ) : (
-                            <span className="text-neutral-600">-</span>
+                            <span className="text-neutral-700">—</span>
                           )}
                         </td>
-                        <td className="px-3 py-2 text-right font-mono text-xs">
+                        <td className="px-4 py-2.5 text-right font-mono text-xs">
                           {Number(e.credit) > 0 ? (
-                            <span className="text-neutral-200">{formatEuro(Number(e.credit))}</span>
+                            <span className="text-rose-400 font-semibold">{formatEuro(Number(e.credit))}</span>
                           ) : (
-                            <span className="text-neutral-600">-</span>
+                            <span className="text-neutral-700">—</span>
                           )}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t border-white/10 bg-white/[0.03]">
-                      <td colSpan={6} className="px-3 py-2.5 text-xs font-semibold text-neutral-400 text-right">
+                    <tr className="border-t-2 border-white/10 bg-white/[0.04]">
+                      <td colSpan={6} className="px-4 py-3 text-xs font-bold text-neutral-300 text-right uppercase tracking-wide">
                         Totaux page
                       </td>
-                      <td className="px-3 py-2.5 text-right font-mono text-xs font-bold text-neutral-200">
+                      <td className="px-4 py-3 text-right font-mono text-xs font-bold text-emerald-400">
                         {formatEuro(totals.debit)}
                       </td>
-                      <td className="px-3 py-2.5 text-right font-mono text-xs font-bold text-neutral-200">
+                      <td className="px-4 py-3 text-right font-mono text-xs font-bold text-rose-400">
                         {formatEuro(totals.credit)}
                       </td>
                     </tr>
+                    {Math.abs(totals.solde) > 0.01 && (
+                      <tr className="bg-white/[0.02]">
+                        <td colSpan={6} className="px-4 py-2 text-xs font-semibold text-neutral-400 text-right">
+                          Solde
+                        </td>
+                        <td colSpan={2} className="px-4 py-2 text-right font-mono text-xs font-bold text-cyan-400">
+                          {formatEuro(totals.solde)}
+                        </td>
+                      </tr>
+                    )}
                   </tfoot>
                 </table>
               </div>
